@@ -2,7 +2,6 @@ use anyhow::*;
 use graphql_client::*;
 use rocket_contrib::json::Json;
 use serde::*;
-use tokio::runtime::Runtime;
 
 use crate::models::LanguagePercentage;
 use crate::models::LanguageSize;
