@@ -1,0 +1,16 @@
+query RepoLanguagesView {
+  viewer {
+    repositories(first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+      nodes {
+        languages(first: 10) {
+          edges {
+            size
+            node {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+}
