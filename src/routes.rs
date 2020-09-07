@@ -20,20 +20,19 @@ struct Env {
     github_api_token: String,
 }
 
-async fn get_github_repositories() -> Result<repo_languages_view::ResponseData, anyhow::Error> {
+fn get_github_repositories() -> Result<repo_languages_view::ResponseData, anyhow::Error> {
     dotenv::dotenv().ok();
     let github_api_token =
         std::env::var("github_api_token").expect("github_api_token is not defined");
     let request_body = RepoLanguagesView::build_query(repo_languages_view::Variables {});
 
-    let client = reqwest::Client::new();
+    let client = reqwest::blocking::Client::new();
     let response = client
         .post("https://api.github.com/graphql")
         .bearer_auth(github_api_token)
         .json(&request_body)
-        .send()
-        .await?;
-    let response_body: Response<repo_languages_view::ResponseData> = response.json().await?;
+        .send()?;
+    let response_body: Response<repo_languages_view::ResponseData> = response.json()?;
     let response_data: repo_languages_view::ResponseData =
         response_body.data.expect("missing response data");
 
@@ -107,10 +106,7 @@ fn calc_languages_percentage_from_languages_size(
 
 #[get("/languages")]
 pub fn languages() -> Json<Vec<LanguagePercentage>> {
-    let response_data = Runtime::new()
-        .expect("Failed to create Tokio runtime")
-        .block_on(get_github_repositories())
-        .unwrap();
+    let response_data = get_github_repositories().unwrap();
     let languages_size = get_languages_size(response_data);
     let languages_percentage = calc_languages_percentage_from_languages_size(languages_size);
     Json(languages_percentage)
