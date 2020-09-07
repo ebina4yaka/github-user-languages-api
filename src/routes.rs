@@ -1,5 +1,4 @@
-use anyhow::*;
-use graphql_client::*;
+use graphql_client::{GraphQLQuery, Response};
 use rocket_contrib::json::Json;
 use serde::*;
 
