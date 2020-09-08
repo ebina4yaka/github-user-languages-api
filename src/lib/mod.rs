@@ -1,41 +1,8 @@
-use graphql_client::{GraphQLQuery, Response};
-use rocket_contrib::json::Json;
-use serde::*;
-
-use crate::models::LanguagePercentage;
-use crate::models::LanguageSize;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "src/graphql/schema.graphql",
-    query_path = "src/graphql/query.graphql",
-    response_derives = "Debug"
-)]
-pub struct RepoLanguagesView;
-
-#[derive(Deserialize, Debug)]
-struct Env {
-    github_api_token: String,
-}
-
-fn get_github_repositories() -> Result<repo_languages_view::ResponseData, anyhow::Error> {
-    dotenv::dotenv().ok();
-    let github_api_token =
-        std::env::var("github_api_token").expect("github_api_token is not defined");
-    let request_body = RepoLanguagesView::build_query(repo_languages_view::Variables {});
-
-    let client = reqwest::blocking::Client::new();
-    let response = client
-        .post("https://api.github.com/graphql")
-        .bearer_auth(github_api_token)
-        .json(&request_body)
-        .send()?;
-    let response_body: Response<repo_languages_view::ResponseData> = response.json()?;
-    let response_data: repo_languages_view::ResponseData =
-        response_body.data.expect("missing response data");
-
-    Ok(response_data)
-}
+pub mod models;
+mod network;
+use models::*;
+use network::get_github_repositories;
+use network::repo_languages_view;
 
 fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<LanguageSize> {
     let mut languages_size: Vec<LanguageSize> = vec![];
@@ -81,8 +48,8 @@ fn calc_total_size(languages_size: &Vec<LanguageSize>) -> i64 {
     size_total
 }
 
-fn calc_percentage(target: f64, size: f64) -> i32 {
-    return (target / size * 100.0).round() as i32;
+fn calc_percentage(target: f64, size: f64) -> f64 {
+    return ((target / size * 100.0) * 100.0).round() / 100.0;
 }
 
 fn calc_languages_percentage_from_languages_size(
@@ -98,14 +65,29 @@ fn calc_languages_percentage_from_languages_size(
         };
         languages_percentage.push(language_percentage);
     }
-    languages_percentage.sort_by(|a, b| b.percentage.cmp(&a.percentage));
+    languages_percentage.sort_by(|a, b| b.percentage.partial_cmp(&a.percentage).unwrap());
     languages_percentage
+        .into_iter()
+        .filter(|x| x.percentage != 0.0)
+        .collect()
 }
 
-#[get("/languages")]
-pub fn languages() -> Json<Vec<LanguagePercentage>> {
+pub fn get_languages_percentage() -> Vec<LanguagePercentage> {
     let response_data = get_github_repositories().unwrap();
     let languages_size = get_languages_size(response_data);
-    let languages_percentage = calc_languages_percentage_from_languages_size(languages_size);
-    Json(languages_percentage)
+    calc_languages_percentage_from_languages_size(languages_size)
+}
+
+pub fn get_languages_percentage_hide_option(hide_languages: &str) -> Vec<LanguagePercentage> {
+    let hide_languages_vec: Vec<&str> = hide_languages.split(',').collect();
+    let response_data = get_github_repositories().unwrap();
+    let languages_size = get_languages_size(response_data);
+    let mut filtered_languages_size = languages_size;
+    for hide_language in hide_languages_vec {
+        filtered_languages_size = filtered_languages_size
+            .into_iter()
+            .filter(|x| x.name != hide_language.to_string())
+            .collect();
+    }
+    calc_languages_percentage_from_languages_size(filtered_languages_size)
 }

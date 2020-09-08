@@ -7,15 +7,15 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug executable 'github-language-percentages-webapi'",
+      "name": "Debug executable 'github-languages-percentage-webapi'",
       "cargo": {
         "args": [
           "build",
-          "--bin=github-language-percentages-webapi",
-          "--package=github-language-percentages-webapi"
+          "--bin=github-languages-percentage-webapi",
+          "--package=github-languages-percentage-webapi"
         ],
         "filter": {
-          "name": "github-language-percentages-webapi",
+          "name": "github-languages-percentage-webapi",
           "kind": "bin"
         }
       },
@@ -25,16 +25,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in executable 'github-language-percentages-webapi'",
+      "name": "Debug unit tests in executable 'github-languages-percentage-webapi'",
       "cargo": {
         "args": [
           "test",
           "--no-run",
-          "--bin=github-language-percentages-webapi",
-          "--package=github-language-percentages-webapi"
+          "--bin=github-languages-percentage-webapi",
+          "--package=github-languages-percentage-webapi"
         ],
         "filter": {
-          "name": "github-language-percentages-webapi",
+          "name": "github-languages-percentage-webapi",
           "kind": "bin"
         }
       },
