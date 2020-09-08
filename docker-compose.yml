@@ -2,7 +2,6 @@ version: '3'
 services:
   nginx:
     image: nginx:1.19.2-alpine
-    container_name: nginx
     ports:
       - "80:80"
     volumes:
@@ -12,6 +11,7 @@ services:
   app:
     build:
       context: .
-    container_name: app
+    env_file:
+      - ./.env
     ports:
       - "8000:8000"
