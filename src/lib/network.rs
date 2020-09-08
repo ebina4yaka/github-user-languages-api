@@ -14,11 +14,15 @@ struct Env {
     github_api_token: String,
 }
 
-pub fn get_github_repositories() -> Result<repo_languages_view::ResponseData, anyhow::Error> {
+pub fn get_github_repositories(
+    username: &str,
+) -> Result<repo_languages_view::ResponseData, anyhow::Error> {
     dotenv::dotenv().ok();
     let github_api_token =
         std::env::var("github_api_token").expect("github_api_token is not defined");
-    let request_body = RepoLanguagesView::build_query(repo_languages_view::Variables {});
+    let request_body = RepoLanguagesView::build_query(repo_languages_view::Variables {
+        username: username.to_string(),
+    });
 
     let client = reqwest::blocking::Client::new();
     let response = client

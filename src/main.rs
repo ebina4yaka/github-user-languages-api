@@ -11,14 +11,17 @@ use lib::models::LanguagePercentage;
 use rocket::http::RawStr;
 use rocket_contrib::json::Json;
 
-#[get("/languages")]
-pub fn languages() -> Json<Vec<LanguagePercentage>> {
-    Json(get_languages_percentage())
+#[get("/user/<username>")]
+pub fn languages(username: &RawStr) -> Json<Vec<LanguagePercentage>> {
+    Json(get_languages_percentage(username.as_str()))
 }
 
-#[get("/languages?<hide>")]
-pub fn languages_hide(hide: &RawStr) -> Json<Vec<LanguagePercentage>> {
-    Json(get_languages_percentage_hide_option(hide.as_str()))
+#[get("/user/<username>?<hide>")]
+pub fn languages_hide(username: &RawStr, hide: &RawStr) -> Json<Vec<LanguagePercentage>> {
+    Json(get_languages_percentage_hide_option(
+        username.as_str(),
+        hide.as_str(),
+    ))
 }
 
 fn main() {

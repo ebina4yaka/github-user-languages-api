@@ -7,7 +7,8 @@ use network::repo_languages_view;
 fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<LanguageSize> {
     let mut languages_size: Vec<LanguageSize> = vec![];
     for repos in &response_data
-        .viewer
+        .user
+        .expect("user is null")
         .repositories
         .nodes
         .expect("nodes is null")
@@ -75,15 +76,18 @@ fn calc_languages_percentage_from_languages_size(
         .collect()
 }
 
-pub fn get_languages_percentage() -> Vec<LanguagePercentage> {
-    let response_data = get_github_repositories().unwrap();
+pub fn get_languages_percentage(username: &str) -> Vec<LanguagePercentage> {
+    let response_data = get_github_repositories(username).unwrap();
     let languages_size = get_languages_size(response_data);
     calc_languages_percentage_from_languages_size(languages_size)
 }
 
-pub fn get_languages_percentage_hide_option(hide_languages: &str) -> Vec<LanguagePercentage> {
+pub fn get_languages_percentage_hide_option(
+    username: &str,
+    hide_languages: &str,
+) -> Vec<LanguagePercentage> {
     let hide_languages_vec: Vec<&str> = hide_languages.split(',').collect();
-    let response_data = get_github_repositories().unwrap();
+    let response_data = get_github_repositories(username).unwrap();
     let languages_size = get_languages_size(response_data);
     let mut filtered_languages_size = languages_size;
     for hide_language in hide_languages_vec {
