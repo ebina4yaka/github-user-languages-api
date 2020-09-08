@@ -86,7 +86,7 @@ pub fn get_languages_percentage_hide_option(hide_languages: &str) -> Vec<Languag
     for hide_language in hide_languages_vec {
         filtered_languages_size = filtered_languages_size
             .into_iter()
-            .filter(|x| x.name != hide_language.to_string())
+            .filter(|x| x.name.to_lowercase() != hide_language.to_string().to_lowercase())
             .collect();
     }
     calc_languages_percentage_from_languages_size(filtered_languages_size)

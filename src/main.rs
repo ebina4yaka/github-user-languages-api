@@ -22,5 +22,7 @@ pub fn languages_hide(hide: &RawStr) -> Json<Vec<LanguagePercentage>> {
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![languages]).launch();
+    rocket::ignite()
+        .mount("/", routes![languages, languages_hide])
+        .launch();
 }
