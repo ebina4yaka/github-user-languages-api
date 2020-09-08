@@ -13,6 +13,9 @@ fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<L
         .expect("nodes is null")
     {
         if let Some(repos) = repos {
+            if repos.is_fork {
+                continue;
+            }
             for languages in &repos.languages {
                 for edges in languages.edges.as_ref().expect("edges is null") {
                     if let Some(edges) = edges {
@@ -90,4 +93,46 @@ pub fn get_languages_percentage_hide_option(hide_languages: &str) -> Vec<Languag
             .collect();
     }
     calc_languages_percentage_from_languages_size(filtered_languages_size)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn exploration() {
+        let mut languages_size: Vec<LanguageSize> = vec![];
+        languages_size.push(LanguageSize {
+            name: "Elm".to_string(),
+            size: 9712,
+        });
+        languages_size.push(LanguageSize {
+            name: "Rust".to_string(),
+            size: 3124,
+        });
+        languages_size.push(LanguageSize {
+            name: "TypeScript".to_string(),
+            size: 4325,
+        });
+        languages_size.push(LanguageSize {
+            name: "C#".to_string(),
+            size: 5342,
+        });
+        // Total size = 22502
+        let languages_percentage = calc_languages_percentage_from_languages_size(languages_size);
+
+        for lang in languages_percentage {
+            if lang.name == "C#" {
+                assert_eq!(lang.percentage, 23.74);
+            }
+            if lang.name == "TypeScript" {
+                assert_eq!(lang.percentage, 19.22);
+            }
+            if lang.name == "Rust" {
+                assert_eq!(lang.percentage, 13.88);
+            }
+            if lang.name == "Elm" {
+                assert_eq!(lang.percentage, 43.16);
+            }
+        }
+    }
 }
