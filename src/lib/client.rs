@@ -9,11 +9,6 @@ use serde::*;
 )]
 pub struct RepoLanguagesView;
 
-#[derive(Deserialize, Debug)]
-struct Env {
-    github_api_token: String,
-}
-
 pub fn get_github_repositories(
     username: &str,
 ) -> Result<repo_languages_view::ResponseData, anyhow::Error> {
