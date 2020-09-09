@@ -3,6 +3,7 @@ pub mod models;
 use client::get_github_repositories;
 use client::repo_languages_view;
 use models::*;
+use std::panic;
 
 fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<LanguageSize> {
     let mut languages_size: Vec<LanguageSize> = vec![];
@@ -32,7 +33,7 @@ fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<L
                         } else {
                             let language_size = LanguageSize {
                                 name: name.to_string(),
-                                size: size,
+                                size,
                             };
                             languages_size.push(language_size);
                         }
@@ -78,8 +79,11 @@ fn calc_languages_percentage_from_languages_size(
 
 pub fn get_languages_percentage(username: &str) -> Vec<LanguagePercentage> {
     let response_data = get_github_repositories(username).unwrap();
-    let languages_size = get_languages_size(response_data);
-    calc_languages_percentage_from_languages_size(languages_size)
+    let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
+    if let Err(_) = languages_size {
+        return vec![];
+    }
+    calc_languages_percentage_from_languages_size(languages_size.unwrap())
 }
 
 pub fn get_languages_percentage_hide_option(
@@ -88,8 +92,11 @@ pub fn get_languages_percentage_hide_option(
 ) -> Vec<LanguagePercentage> {
     let hide_languages_vec: Vec<&str> = hide_languages.split(',').collect();
     let response_data = get_github_repositories(username).unwrap();
-    let languages_size = get_languages_size(response_data);
-    let mut filtered_languages_size = languages_size;
+    let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
+    if let Err(_) = languages_size {
+        return vec![];
+    }
+    let mut filtered_languages_size = languages_size.unwrap();
     for hide_language in hide_languages_vec {
         filtered_languages_size = filtered_languages_size
             .into_iter()
