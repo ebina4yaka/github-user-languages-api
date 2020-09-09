@@ -1,8 +1,8 @@
-pub mod models;
 mod client;
-use models::*;
+pub mod models;
 use client::get_github_repositories;
 use client::repo_languages_view;
+use models::*;
 
 fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<LanguageSize> {
     let mut languages_size: Vec<LanguageSize> = vec![];
