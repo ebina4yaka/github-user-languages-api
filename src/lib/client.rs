@@ -1,5 +1,4 @@
 use graphql_client::{GraphQLQuery, Response};
-use serde::*;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -14,7 +13,7 @@ pub fn get_github_repositories(
 ) -> Result<repo_languages_view::ResponseData, anyhow::Error> {
     dotenv::dotenv().ok();
     let github_api_token =
-        std::env::var("github_api_token").expect("github_api_token is not defined");
+        std::env::var("GITHUB_API_TOKEN").expect("GITHUB_API_TOKEN is not defined");
     let request_body = RepoLanguagesView::build_query(repo_languages_view::Variables {
         username: username.to_string(),
     });
