@@ -13,6 +13,8 @@ RUN /bin/bash -c "rustup toolchain install nightly"
 RUN /bin/bash -c "rustup target add x86_64-unknown-linux-musl --toolchain nightly"
 # Build
 RUN /bin/bash -c "cargo +nightly build --release --target x86_64-unknown-linux-musl"
+# Test
+RUN /bin/bash -c "cargo +nightly test --release"
 
 
 FROM alpine:3.12.0 AS app
