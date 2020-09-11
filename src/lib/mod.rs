@@ -45,7 +45,7 @@ fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<L
     languages_size
 }
 
-fn calc_total_size(languages_size: &Vec<LanguageSize>) -> i64 {
+fn calc_total_size(languages_size: &[LanguageSize]) -> i64 {
     let mut size_total = 0;
     for language_size in languages_size {
         size_total += language_size.size;
@@ -54,7 +54,7 @@ fn calc_total_size(languages_size: &Vec<LanguageSize>) -> i64 {
 }
 
 fn calc_percentage(target: f64, size: f64) -> f64 {
-    return ((target / size * 100.0) * 100.0).round() / 100.0;
+    ((target / size * 100.0) * 100.0).round() / 100.0
 }
 
 fn calc_languages_percentage_from_languages_size(
@@ -62,7 +62,7 @@ fn calc_languages_percentage_from_languages_size(
 ) -> Vec<LanguagePercentage> {
     let mut languages_percentage: Vec<LanguagePercentage> = vec![];
     let size_total = calc_total_size(&languages_size);
-    for language_size in &languages_size {
+    for language_size in languages_size {
         let name = &language_size.name;
         let language_percentage = LanguagePercentage {
             name: name.to_string(),
@@ -80,7 +80,7 @@ fn calc_languages_percentage_from_languages_size(
 pub fn get_languages_percentage(username: &str) -> Vec<LanguagePercentage> {
     let response_data = get_github_repositories(username).unwrap();
     let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
-    if let Err(_) = languages_size {
+    if let Err(_is_error) = languages_size {
         return vec![];
     }
     calc_languages_percentage_from_languages_size(languages_size.unwrap())
@@ -93,7 +93,7 @@ pub fn get_languages_percentage_hide_option(
     let hide_languages_vec: Vec<&str> = hide_languages.split(',').collect();
     let response_data = get_github_repositories(username).unwrap();
     let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
-    if let Err(_) = languages_size {
+    if let Err(_is_error) = languages_size {
         return vec![];
     }
     let mut filtered_languages_size = languages_size.unwrap();

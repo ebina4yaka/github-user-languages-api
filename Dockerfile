@@ -8,13 +8,14 @@ COPY Cargo.toml .
 RUN sudo chown rust:rust /home/rust/src/Cargo.toml
 COPY Rocket.toml .
 RUN sudo chown rust:rust /home/rust/src/Rocket.toml
+COPY rust-toolchain .
+RUN sudo chown rust:rust /home/rust/src/Rocket.toml
 
-RUN /bin/bash -c "rustup toolchain install nightly"
-RUN /bin/bash -c "rustup target add x86_64-unknown-linux-musl --toolchain nightly"
+RUN /bin/bash -c "rustup target add x86_64-unknown-linux-musl"
 # Build
-RUN /bin/bash -c "cargo +nightly build --release --target x86_64-unknown-linux-musl"
+RUN /bin/bash -c "cargo build --release --target x86_64-unknown-linux-musl"
 # Test
-RUN /bin/bash -c "cargo +nightly test --release"
+RUN /bin/bash -c "cargo test --release"
 
 
 FROM alpine:3.12.0 AS app
