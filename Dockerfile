@@ -24,6 +24,5 @@ WORKDIR /app
 # Copy in statically linked binary from builder stage
 COPY --from=builder /home/rust/src/target/x86_64-unknown-linux-musl/release/github-languages-percentage-webapi /usr/local/bin
 # Expose port for server
-EXPOSE 8000
 # Run entrypoint script
-CMD github-languages-percentage-webapi
+CMD ROCKET_PORT=$PORT github-languages-percentage-webapi
