@@ -1,4 +1,4 @@
-# GithubUserLanguagesAPI
+# 🦀GithubUserLanguagesAPI🦀
 ## About
 This is a web API, that uses the Github GraphQL API to calculate and return programming language usage for 100 repositories for a given Github user. (exclude forked repositories)
 ## Usage
