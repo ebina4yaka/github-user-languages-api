@@ -53,7 +53,7 @@ You can use `?hide=language1,language2` parameter to hide individual languages.
 
 example
 ```
-https://hostname/user/ebina4yaka?hide=css,html
+https://hostname/user/ebina4yaka?hide=css,html,dockerfile
 ```
 
 ## Deploy
