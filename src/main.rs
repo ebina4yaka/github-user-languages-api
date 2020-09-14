@@ -7,9 +7,12 @@ use lib::get_languages_percentage;
 use lib::get_languages_percentage_hide_option;
 use lib::models::Error;
 use lib::models::LanguagePercentage;
+use rocket::http::Method;
 use rocket::http::RawStr;
 use rocket::Request;
+use rocket::{get, routes};
 use rocket_contrib::json::Json;
+use rocket_cors::{AllowedHeaders, AllowedOrigins};
 
 #[catch(500)]
 fn internal_error() -> Json<Error> {
@@ -41,8 +44,20 @@ pub fn languages_hide(username: &RawStr, hide: &RawStr) -> Json<Vec<LanguagePerc
 }
 
 fn main() {
+    let allowed_origins = AllowedOrigins::All;
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins,
+        allowed_methods: vec![Method::Get].into_iter().map(From::from).collect(),
+        allowed_headers: AllowedHeaders::some(&["Accept"]),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()
+    .unwrap();
+
     rocket::ignite()
         .mount("/", routes![languages, languages_hide])
+        .attach(cors)
         .register(catchers![not_found])
         .launch();
 }
