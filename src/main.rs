@@ -5,7 +5,7 @@ extern crate rocket;
 mod lib;
 use lib::get_languages_percentage;
 use lib::get_languages_percentage_hide_option;
-use lib::models::Error;
+use lib::models::ErrorMessage;
 use lib::models::LanguagePercentage;
 use rocket::http::Method;
 use rocket::http::RawStr;
@@ -15,16 +15,16 @@ use rocket_contrib::json::Json;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 
 #[catch(500)]
-fn internal_error() -> Json<Error> {
-    let error = Error {
+fn internal_error() -> Json<ErrorMessage> {
+    let error = ErrorMessage {
         message: "Whoops! Looks like we messed up.".to_string(),
     };
     Json(error)
 }
 
 #[catch(404)]
-fn not_found(req: &Request) -> Json<Error> {
-    let error = Error {
+fn not_found(req: &Request) -> Json<ErrorMessage> {
+    let error = ErrorMessage {
         message: format!("I couldn't find '{}'. Try something else?", req.uri()),
     };
     Json(error)
@@ -58,6 +58,6 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![languages, languages_hide])
         .attach(cors)
-        .register(catchers![not_found])
+        .register(catchers![internal_error, not_found])
         .launch();
 }
