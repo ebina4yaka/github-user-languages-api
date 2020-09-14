@@ -1,6 +1,6 @@
 [package]
 name = "github-languages-percentage-webapi"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["ebina4yaka <4yaka3bina@gmail.com>"]
 edition = "2018"
 
