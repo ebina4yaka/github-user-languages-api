@@ -1,6 +1,6 @@
 query RepoLanguagesView($username: String!) {
   user(login: $username) {
-    repositories(first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+    repositories(first: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
       nodes {
         isFork
         languages(first: 10) {
@@ -8,6 +8,7 @@ query RepoLanguagesView($username: String!) {
             size
             node {
               name
+              color
             }
           }
         }

@@ -22,17 +22,23 @@ fn get_languages_size(response_data: repo_languages_view::ResponseData) -> Vec<L
                 for edges in languages.edges.as_ref().expect("edges is null") {
                     if let Some(edges) = edges {
                         let name = &edges.node.name;
+                        let mut color: String = "".to_string();
+                        if let Some(color_value) = edges.node.color.as_ref() {
+                            color = color_value.to_string();
+                        }
                         let size = edges.size;
 
                         if let Some(index) = languages_size.iter().position(|x| &x.name == name) {
                             let language_size = LanguageSize {
                                 name: name.to_string(),
+                                color,
                                 size: size + languages_size[index].size,
                             };
                             let _ = std::mem::replace(&mut languages_size[index], language_size);
                         } else {
                             let language_size = LanguageSize {
                                 name: name.to_string(),
+                                color,
                                 size,
                             };
                             languages_size.push(language_size);
@@ -64,8 +70,10 @@ fn calc_languages_percentage_from_languages_size(
     let size_total = calc_total_size(&languages_size);
     for language_size in languages_size {
         let name = &language_size.name;
+        let color = &language_size.color;
         let language_percentage = LanguagePercentage {
             name: name.to_string(),
+            color: color.to_string(),
             percentage: calc_percentage(language_size.size as f64, size_total as f64),
         };
         languages_percentage.push(language_percentage);
@@ -114,18 +122,22 @@ mod tests {
         let mut languages_size: Vec<LanguageSize> = vec![];
         languages_size.push(LanguageSize {
             name: "Elm".to_string(),
+            color: "".to_string(),
             size: 9712,
         });
         languages_size.push(LanguageSize {
             name: "Rust".to_string(),
+            color: "".to_string(),
             size: 3124,
         });
         languages_size.push(LanguageSize {
             name: "TypeScript".to_string(),
+            color: "".to_string(),
             size: 4325,
         });
         languages_size.push(LanguageSize {
             name: "C#".to_string(),
+            color: "".to_string(),
             size: 5342,
         });
         // Total size = 22502
