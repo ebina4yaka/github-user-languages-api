@@ -3,10 +3,10 @@
 extern crate rocket;
 
 mod lib;
-use lib::get_languages_percentage;
-use lib::get_languages_percentage_hide_option;
-use lib::models::ErrorMessage;
-use lib::models::LanguagePercentage;
+use crate::lib::languages::get_languages_percentage;
+use crate::lib::languages::get_languages_percentage_hide_option;
+use crate::lib::models::ErrorMessage;
+use crate::lib::models::LanguagePercentage;
 use rocket::http::Method;
 use rocket::http::RawStr;
 use rocket::Request;
