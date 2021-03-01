@@ -1,6 +1,8 @@
 use crate::lib::client::get_github_repositories;
 use crate::lib::client::repositories_languages_view;
 use crate::lib::models::*;
+use crate::Params;
+use rocket::request::Form;
 use std::panic;
 
 fn get_languages_size(
@@ -16,9 +18,6 @@ fn get_languages_size(
         .expect("nodes is null");
 
     for repository in &repositories {
-        if repository.as_ref().unwrap().is_fork {
-            continue;
-        }
         for languages in repository.as_ref().unwrap().languages.as_ref() {
             for edges in languages.edges.as_ref().expect("edges is null") {
                 let name = &edges.as_ref().unwrap().node.name;
@@ -92,11 +91,12 @@ pub fn get_languages_percentage(username: &str) -> Vec<LanguagePercentage> {
     calc_languages_percentage_from_languages_size(languages_size.unwrap())
 }
 
-pub fn get_languages_percentage_hide_option(
+pub fn get_languages_percentage_with_params(
     username: &str,
-    hide_languages: &str,
+    params: Option<Form<Params>>,
 ) -> Vec<LanguagePercentage> {
-    let hide_languages_vec: Vec<&str> = hide_languages.split(',').collect();
+    let params = params.unwrap();
+    let hide_languages_vec: Vec<&str> = params.hide.split(',').collect();
     let response_data = get_github_repositories(username).unwrap();
     let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
     if let Err(_is_error) = languages_size {
@@ -109,7 +109,15 @@ pub fn get_languages_percentage_hide_option(
             .filter(|x| x.name.to_lowercase() != hide_language.to_string().to_lowercase())
             .collect();
     }
-    calc_languages_percentage_from_languages_size(filtered_languages_size)
+    let mut languages_percentage =
+        calc_languages_percentage_from_languages_size(filtered_languages_size);
+    languages_percentage.reverse();
+    let mut result: Vec<LanguagePercentage> = vec![];
+    for _index in 0..params.limit {
+        let item = languages_percentage.pop().unwrap();
+        result.push(item)
+    }
+    result
 }
 
 #[cfg(test)]

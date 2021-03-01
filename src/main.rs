@@ -3,12 +3,12 @@
 extern crate rocket;
 
 mod lib;
-use crate::lib::languages::get_languages_percentage;
-use crate::lib::languages::get_languages_percentage_hide_option;
+use crate::lib::languages::{get_languages_percentage, get_languages_percentage_with_params};
 use crate::lib::models::ErrorMessage;
 use crate::lib::models::LanguagePercentage;
 use rocket::http::Method;
 use rocket::http::RawStr;
+use rocket::request::Form;
 use rocket::Request;
 use rocket::{get, routes};
 use rocket_contrib::json::Json;
@@ -30,16 +30,25 @@ fn not_found(req: &Request) -> Json<ErrorMessage> {
     Json(error)
 }
 
+#[derive(FromForm)]
+pub struct Params {
+    pub hide: String,
+    pub limit: usize,
+}
+
 #[get("/user/<username>")]
 pub fn languages(username: &RawStr) -> Json<Vec<LanguagePercentage>> {
     Json(get_languages_percentage(username.as_str()))
 }
 
-#[get("/user/<username>?<hide>")]
-pub fn languages_hide(username: &RawStr, hide: &RawStr) -> Json<Vec<LanguagePercentage>> {
-    Json(get_languages_percentage_hide_option(
+#[get("/user/<username>?<params..>")]
+pub fn languages_option(
+    username: &RawStr,
+    params: Option<Form<Params>>,
+) -> Json<Vec<LanguagePercentage>> {
+    Json(get_languages_percentage_with_params(
         username.as_str(),
-        hide.as_str(),
+        params,
     ))
 }
 
@@ -56,7 +65,7 @@ fn main() {
     .unwrap();
 
     rocket::ignite()
-        .mount("/", routes![languages, languages_hide])
+        .mount("/", routes![languages, languages_option])
         .attach(cors)
         .register(catchers![internal_error, not_found])
         .launch();
