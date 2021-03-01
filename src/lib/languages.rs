@@ -109,15 +109,16 @@ pub fn get_languages_percentage_with_params(
             .filter(|x| x.name.to_lowercase() != hide_language.to_string().to_lowercase())
             .collect();
     }
-    let mut languages_percentage =
-        calc_languages_percentage_from_languages_size(filtered_languages_size);
-    languages_percentage.reverse();
-    let mut result: Vec<LanguagePercentage> = vec![];
+    filtered_languages_size.sort_by(|a, b| a.size.cmp(&b.size));
+    let mut limited_languages_size: Vec<LanguageSize> = vec![];
     for _index in 0..params.limit {
-        let item = languages_percentage.pop().unwrap();
-        result.push(item)
+        match filtered_languages_size.pop() {
+            None => break,
+            Some(item) => limited_languages_size.push(item),
+        }
     }
-    result
+
+    calc_languages_percentage_from_languages_size(limited_languages_size)
 }
 
 #[cfg(test)]
