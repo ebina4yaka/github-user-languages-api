@@ -18,7 +18,7 @@ fn get_languages_size(
         .expect("nodes is null");
 
     for repository in &repositories {
-        for languages in repository.as_ref().unwrap().languages.as_ref() {
+        if let Some(languages) = repository.as_ref().unwrap().languages.as_ref() {
             for edges in languages.edges.as_ref().expect("edges is null") {
                 let name = &edges.as_ref().unwrap().node.name;
                 let mut color: String = "".to_string();
