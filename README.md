@@ -20,6 +20,11 @@ example
 https://github-user-languages-api.herokuapp.com/user/ebina4yaka
 ```
 
+options
+```
+https://github-user-languages-api.herokuapp.com/user/ebina4yaka?limit=6&hide=css,vim script,PLpgSQL,makefile,shell,javascript,dockerfile
+```
+
 ### Response
 
 ```
@@ -73,10 +78,14 @@ example
 
 You can use `?hide=language1,language2` parameter to hide individual languages.
 
-example
-
 ```
 https://github-user-languages-api.herokuapp.com/user/ebina4yaka?hide=css,html,dockerfile
+```
+
+### Limit the number of languages
+
+```
+https://github-user-languages-api.herokuapp.com/user/ebina4yaka?limit=6
 ```
 
 ## Deploy
