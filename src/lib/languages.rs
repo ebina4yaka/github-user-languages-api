@@ -1,6 +1,8 @@
 use crate::lib::client::get_github_repositories;
 use crate::lib::client::repositories_languages_view;
 use crate::lib::models::*;
+use crate::Params;
+use rocket::request::Form;
 use std::panic;
 
 fn get_languages_size(
@@ -16,10 +18,7 @@ fn get_languages_size(
         .expect("nodes is null");
 
     for repository in &repositories {
-        if repository.as_ref().unwrap().is_fork {
-            continue;
-        }
-        for languages in repository.as_ref().unwrap().languages.as_ref() {
+        if let Some(languages) = repository.as_ref().unwrap().languages.as_ref() {
             for edges in languages.edges.as_ref().expect("edges is null") {
                 let name = &edges.as_ref().unwrap().node.name;
                 let mut color: String = "".to_string();
@@ -83,33 +82,55 @@ fn calc_languages_percentage_from_languages_size(
         .collect()
 }
 
-pub fn get_languages_percentage(username: &str) -> Vec<LanguagePercentage> {
-    let response_data = get_github_repositories(username).unwrap();
-    let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
-    if let Err(_is_error) = languages_size {
-        return vec![];
-    }
-    calc_languages_percentage_from_languages_size(languages_size.unwrap())
-}
-
-pub fn get_languages_percentage_hide_option(
+pub fn get_languages_percentage(
     username: &str,
-    hide_languages: &str,
+    params: Option<Form<Params>>,
 ) -> Vec<LanguagePercentage> {
-    let hide_languages_vec: Vec<&str> = hide_languages.split(',').collect();
     let response_data = get_github_repositories(username).unwrap();
     let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
     if let Err(_is_error) = languages_size {
         return vec![];
     }
-    let mut filtered_languages_size = languages_size.unwrap();
-    for hide_language in hide_languages_vec {
-        filtered_languages_size = filtered_languages_size
-            .into_iter()
-            .filter(|x| x.name.to_lowercase() != hide_language.to_string().to_lowercase())
-            .collect();
+
+    if params.is_none() {
+        return calc_languages_percentage_from_languages_size(languages_size.unwrap());
     }
-    calc_languages_percentage_from_languages_size(filtered_languages_size)
+
+    let params = params.unwrap();
+
+    let mut filtered_languages_size = match &params.hide {
+        None => {
+            let mut result = languages_size.unwrap();
+            result.sort_by(|a, b| a.size.cmp(&b.size));
+            result
+        }
+        Some(hide) => {
+            let mut result = languages_size.unwrap();
+            let hide_languages_vec: Vec<&str> = hide.split(',').collect();
+            for hide_language in hide_languages_vec {
+                result = result
+                    .into_iter()
+                    .filter(|x| x.name.to_lowercase() != hide_language.to_string().to_lowercase())
+                    .collect();
+            }
+            result.sort_by(|a, b| a.size.cmp(&b.size));
+            result
+        }
+    };
+
+    match &params.limit {
+        None => calc_languages_percentage_from_languages_size(filtered_languages_size),
+        Some(limit) => {
+            let mut limited_languages_size: Vec<LanguageSize> = vec![];
+            for _index in 0..*limit {
+                match filtered_languages_size.pop() {
+                    None => break,
+                    Some(item) => limited_languages_size.push(item),
+                }
+            }
+            calc_languages_percentage_from_languages_size(limited_languages_size)
+        }
+    }
 }
 
 #[cfg(test)]

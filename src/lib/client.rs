@@ -17,6 +17,7 @@ pub fn get_github_repositories(
     let request_body =
         RepositoriesLanguagesView::build_query(repositories_languages_view::Variables {
             username: username.to_string(),
+            is_fork: false,
         });
 
     let client = reqwest::blocking::Client::new();
