@@ -4,6 +4,8 @@
 
 This is a web API, that uses the Github GraphQL API to calculate and return programming language usage for 100 repositories for a given Github user. (exclude forked repositories)
 
+[demo](https://github-user-languages-view.herokuapp.com/)
+
 ## Usage
 
 ### Request
@@ -16,6 +18,11 @@ example
 
 ```
 https://github-user-languages-api.herokuapp.com/user/ebina4yaka
+```
+
+options
+```
+https://github-user-languages-api.herokuapp.com/user/ebina4yaka?limit=6&hide=css,vim script,PLpgSQL,makefile,shell,javascript,dockerfile
 ```
 
 ### Response
@@ -71,10 +78,14 @@ example
 
 You can use `?hide=language1,language2` parameter to hide individual languages.
 
-example
-
 ```
 https://github-user-languages-api.herokuapp.com/user/ebina4yaka?hide=css,html,dockerfile
+```
+
+### Limit the number of languages
+
+```
+https://github-user-languages-api.herokuapp.com/user/ebina4yaka?limit=6
 ```
 
 ## Deploy
