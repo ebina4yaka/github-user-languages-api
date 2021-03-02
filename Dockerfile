@@ -3,7 +3,7 @@ FROM ekidd/rust-musl-builder:latest AS builder
 # Add our source code.
 ADD --chown=rust:rust . ./
 # Build our application.
-RUN sudo cargo build --release
+RUN sudo -E cargo build --release
 
 FROM alpine:3.12.0 AS app
 # Set working directory
