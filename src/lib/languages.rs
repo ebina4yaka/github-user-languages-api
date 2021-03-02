@@ -82,43 +82,55 @@ fn calc_languages_percentage_from_languages_size(
         .collect()
 }
 
-pub fn get_languages_percentage(username: &str) -> Vec<LanguagePercentage> {
-    let response_data = get_github_repositories(username).unwrap();
-    let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
-    if let Err(_is_error) = languages_size {
-        return vec![];
-    }
-    calc_languages_percentage_from_languages_size(languages_size.unwrap())
-}
-
-pub fn get_languages_percentage_with_params(
+pub fn get_languages_percentage(
     username: &str,
     params: Option<Form<Params>>,
 ) -> Vec<LanguagePercentage> {
-    let params = params.unwrap();
-    let hide_languages_vec: Vec<&str> = params.hide.split(',').collect();
     let response_data = get_github_repositories(username).unwrap();
     let languages_size = panic::catch_unwind(|| get_languages_size(response_data));
     if let Err(_is_error) = languages_size {
         return vec![];
     }
-    let mut filtered_languages_size = languages_size.unwrap();
-    for hide_language in hide_languages_vec {
-        filtered_languages_size = filtered_languages_size
-            .into_iter()
-            .filter(|x| x.name.to_lowercase() != hide_language.to_string().to_lowercase())
-            .collect();
-    }
-    filtered_languages_size.sort_by(|a, b| a.size.cmp(&b.size));
-    let mut limited_languages_size: Vec<LanguageSize> = vec![];
-    for _index in 0..params.limit {
-        match filtered_languages_size.pop() {
-            None => break,
-            Some(item) => limited_languages_size.push(item),
-        }
+
+    if params.is_none() {
+        return calc_languages_percentage_from_languages_size(languages_size.unwrap());
     }
 
-    calc_languages_percentage_from_languages_size(limited_languages_size)
+    let params = params.unwrap();
+
+    let mut filtered_languages_size = match &params.hide {
+        None => {
+            let mut result = languages_size.unwrap();
+            result.sort_by(|a, b| a.size.cmp(&b.size));
+            result
+        }
+        Some(hide) => {
+            let mut result = languages_size.unwrap();
+            let hide_languages_vec: Vec<&str> = hide.split(',').collect();
+            for hide_language in hide_languages_vec {
+                result = result
+                    .into_iter()
+                    .filter(|x| x.name.to_lowercase() != hide_language.to_string().to_lowercase())
+                    .collect();
+            }
+            result.sort_by(|a, b| a.size.cmp(&b.size));
+            result
+        }
+    };
+
+    match &params.limit {
+        None => calc_languages_percentage_from_languages_size(filtered_languages_size),
+        Some(limit) => {
+            let mut limited_languages_size: Vec<LanguageSize> = vec![];
+            for _index in 0..*limit {
+                match filtered_languages_size.pop() {
+                    None => break,
+                    Some(item) => limited_languages_size.push(item),
+                }
+            }
+            calc_languages_percentage_from_languages_size(limited_languages_size)
+        }
+    }
 }
 
 #[cfg(test)]

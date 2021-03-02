@@ -3,7 +3,7 @@
 extern crate rocket;
 
 mod lib;
-use crate::lib::languages::{get_languages_percentage, get_languages_percentage_with_params};
+use crate::lib::languages::get_languages_percentage;
 use crate::lib::models::ErrorMessage;
 use crate::lib::models::LanguagePercentage;
 use rocket::http::Method;
@@ -32,24 +32,13 @@ fn not_found(req: &Request) -> Json<ErrorMessage> {
 
 #[derive(FromForm)]
 pub struct Params {
-    pub hide: String,
-    pub limit: usize,
-}
-
-#[get("/user/<username>")]
-pub fn languages(username: &RawStr) -> Json<Vec<LanguagePercentage>> {
-    Json(get_languages_percentage(username.as_str()))
+    pub hide: Option<String>,
+    pub limit: Option<usize>,
 }
 
 #[get("/user/<username>?<params..>")]
-pub fn languages_option(
-    username: &RawStr,
-    params: Option<Form<Params>>,
-) -> Json<Vec<LanguagePercentage>> {
-    Json(get_languages_percentage_with_params(
-        username.as_str(),
-        params,
-    ))
+pub fn languages(username: &RawStr, params: Option<Form<Params>>) -> Json<Vec<LanguagePercentage>> {
+    Json(get_languages_percentage(username.as_str(), params))
 }
 
 fn main() {
@@ -65,7 +54,7 @@ fn main() {
     .unwrap();
 
     rocket::ignite()
-        .mount("/", routes![languages, languages_option])
+        .mount("/", routes![languages])
         .attach(cors)
         .register(catchers![internal_error, not_found])
         .launch();
