@@ -11,6 +11,9 @@ RUN sudo chown rust:rust /home/rust/src/Rocket.toml
 COPY rust-toolchain .
 RUN sudo chown rust:rust /home/rust/src/Rocket.toml
 
+RUN mkdir -p /opt/rust/rustup/tmp/
+RUN sudo chown rust:rust /opt/rust/rustup/tmp/
+
 RUN /bin/bash -c "rustup target add x86_64-unknown-linux-musl"
 # Build
 RUN /bin/bash -c "cargo build --release --target x86_64-unknown-linux-musl"
