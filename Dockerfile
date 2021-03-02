@@ -1,28 +1,22 @@
-FROM ekidd/rust-musl-builder:latest AS builder
+ARG BASE_IMAGE=ekidd/rust-musl-builder:1.48.0
 
-COPY src src
-RUN sudo chown -R rust:rust /home/rust/src/
-COPY Cargo.lock .
-RUN sudo chown rust:rust /home/rust/src/Cargo.lock
-COPY Cargo.toml .
-RUN sudo chown rust:rust /home/rust/src/Cargo.toml
-COPY Rocket.toml .
-RUN sudo chown rust:rust /home/rust/src/Rocket.toml
-COPY rust-toolchain .
-RUN sudo chown rust:rust /home/rust/src/Rocket.toml
+# Our first FROM statement declares the build environment.
+FROM ${BASE_IMAGE} AS builder
 
-RUN /bin/bash -c "rustup target add x86_64-unknown-linux-musl"
-# Build
-RUN /bin/bash -c "cargo build --release --target x86_64-unknown-linux-musl"
-# Test
-RUN /bin/bash -c "cargo test --release"
+# Add our source code.
+ADD --chown=rust:rust . ./
 
+# Build our application.
+RUN rustup set profile minimal
+RUN rustup target add x86_64-unknown-linux-musl
+RUN cargo build --release --target=x86_64-unknown-linux-musl
 
-FROM alpine:3.12.0 AS app
+FROM alpine:3.13.2 AS app
 # Set working directory
 WORKDIR /app
 # Copy in statically linked binary from builder stage
-COPY --from=builder /home/rust/src/target/x86_64-unknown-linux-musl/release/github-languages-percentage-webapi /usr/local/bin
-# Expose port for server
-# Run entrypoint script
+COPY --from=builder \
+     /home/rust/src/target/x86_64-unknown-linux-musl/release/github-languages-percentage-webapi \
+     /usr/local/bin
+
 CMD ROCKET_PORT=$PORT github-languages-percentage-webapi
