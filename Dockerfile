@@ -1,25 +1,9 @@
 FROM ekidd/rust-musl-builder:latest AS builder
 
-COPY src src
-RUN sudo chown -R rust:rust /home/rust/src/
-COPY Cargo.lock .
-RUN sudo chown rust:rust /home/rust/src/Cargo.lock
-COPY Cargo.toml .
-RUN sudo chown rust:rust /home/rust/src/Cargo.toml
-COPY Rocket.toml .
-RUN sudo chown rust:rust /home/rust/src/Rocket.toml
-COPY rust-toolchain .
-RUN sudo chown rust:rust /home/rust/src/Rocket.toml
-
-RUN mkdir -p /opt/rust/rustup/tmp/
-RUN sudo chown rust:rust /opt/rust/rustup/tmp/
-
-RUN /bin/bash -c "rustup target add x86_64-unknown-linux-musl"
-# Build
-RUN /bin/bash -c "cargo build --release --target x86_64-unknown-linux-musl"
-# Test
-RUN /bin/bash -c "cargo test --release"
-
+# Add our source code.
+ADD --chown=rust:rust . ./
+# Build our application.
+RUN cargo build --release
 
 FROM alpine:3.12.0 AS app
 # Set working directory
