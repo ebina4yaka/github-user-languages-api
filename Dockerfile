@@ -8,6 +8,7 @@ ADD --chown=rust:rust . ./
 
 # Build our application.
 RUN rustup set profile minimal
+RUN rustup target add x86_64-unknown-linux-musl
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 
 FROM alpine:3.13.2 AS app
